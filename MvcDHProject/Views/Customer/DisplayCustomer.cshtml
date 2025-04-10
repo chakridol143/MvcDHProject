@@ -1,0 +1,32 @@
+﻿@model Customer
+<html>
+    <head></head>
+    <body>
+    <h2 style="background-color:yellowgreen;color:orangered">Customer Details</h2>
+        <table border="1" align="center" class="table-condensed">
+            <tr>
+                <td>CustId</td>
+                <td>@Html.DisplayFor(c=>c.CustId)</td>
+            </tr>
+        <tr>
+            <td>Name</td>
+            <td>@Html.DisplayFor(c => c.Name)</td>
+        </tr>
+        <tr>
+            <td>Balance</td>
+            <td>@Html.DisplayFor(c => c.Balance)</td>
+        </tr>
+        <tr>
+            <td>City</td>
+            <td>@Html.DisplayFor(c => c.City)</td>
+        </tr>
+        <tr>
+            <td>Status</td>
+            <td>@Html.DisplayFor(c => c.Status)</td>
+        </tr>
+        <tr><td colspan="2">
+            <a asp-action="DisplayCustomers" asp-controller="Customer">Back to Customers</a>
+        </td></tr>
+        </table>
+    </body>
+</html>

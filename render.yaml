@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mywebapicoreservice
+    runtime: dotnet
+    buildCommand: dotnet build
+    startCommand: dotnet run --project MyWebApiCoreService/MyWebApiCoreService.csproj
+    region: oregon
+    plan: free
+    branch: master
+    repo: https://github.com/chakridol143/MyWebApiCore.git

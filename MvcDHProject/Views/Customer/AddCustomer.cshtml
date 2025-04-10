@@ -1,0 +1,32 @@
+﻿@model Customer
+<html>
+    <head></head>
+    <body>
+        <h1 style="background-color:yellowgreen;color:orangered">Add Customer</h1>
+      <form asp-action="AddCustomer" asp-controller="Customer">
+          <table>
+            <tr>
+                <td>CustId</td>
+                <td><input required asp-for="CustId" /></td>
+            </tr>
+        <tr>
+            <td>Name</td>
+            <td><input  asp-for="Name" /></td>
+        </tr>
+        <tr>
+            <td>Balance</td>
+            <td><input  asp-for="Balance" /></td>
+        </tr>
+        <tr>
+            <td>City</td>
+            <td><input  asp-for="City" /></td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td><input asp-for="Status" /></td>
+            </tr>
+        <tr><td><input type="submit" value="Add" /></td><td><input type="reset" value="Reset" /></td></tr>
+        </table>
+    </form>
+    </body>
+</html>

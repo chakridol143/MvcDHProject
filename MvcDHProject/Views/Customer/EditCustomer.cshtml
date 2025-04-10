@@ -1,0 +1,33 @@
+﻿@model Customer
+<html>
+<head>
+</head>
+<body>
+    <h1 style="background-color:yellowgreen;color:orangered">Edit Customer</h1>
+    <form asp-action="EditCustomer" asp-controller="Customer">
+        <table>
+            <tr>
+                <td>CustId</td>
+                <td><input readonly asp-for="CustId" /></td>
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td><input asp-for="Name" /></td>
+            </tr>
+            <tr>
+                <td>Balance</td>
+                <td><input asp-for="Balance" /></td>
+            </tr>
+            <tr>
+                <td>City</td>
+                <td><input asp-for="City" /></td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td><input  disabled asp-for="Status"/></td>
+            </tr>
+            <tr><td><input type="submit" value="Save" /></td><td><a asp-controller="Customer" asp-action="DisplayCustomers" value="Cancel" /></td></tr>
+        </table>
+    </form>
+</body>
+</html>
