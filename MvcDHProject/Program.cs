@@ -32,7 +32,6 @@ namespace MvcDHProject
 
             builder.Services.AddAuthentication(options => {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
             })
                 .AddGoogle(options =>
                 {
