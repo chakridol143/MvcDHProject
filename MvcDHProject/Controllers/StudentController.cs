@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using MVCCoreDBF.Models;
 using MvcDHProject.Models;
 
@@ -17,10 +16,9 @@ namespace MVCCoreDBF.Controllers
     public class StudentController : Controller
     {
         private readonly MVCCoreDbContext _context;
-
         private readonly IWebHostEnvironment _webHost;
 
-        public StudentController(MVCCoreDbContext context,IWebHostEnvironment webHost)
+        public StudentController(MVCCoreDbContext context, IWebHostEnvironment webHost)
         {
             _context = context;
             _webHost = webHost;
@@ -57,21 +55,21 @@ namespace MVCCoreDBF.Controllers
             return View();
         }
 
-        
+        // POST: Student/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Sid,Name,Class,Fees,Photo,Status")] Student student,IFormFile selectedFile)
+        public async Task<IActionResult> Create([Bind("Sid,Name,Class,Fees,Photo,Status")] Student student, IFormFile selectedFile)
         {
-            if (ModelState.IsValid || ModelState.ErrorCount == 1 && ModelState["selectedFile"].ValidationState == ModelValidationState.Invalid) {
-
+            if (ModelState.IsValid || ModelState.ErrorCount == 1 && ModelState["selectedFile"].ValidationState == ModelValidationState.Invalid)
+            {
                 if (selectedFile != null)
                 {
-                    student.Photo = await UploadToCloudinary(selectedFile);
+                    student.Photo = SaveFileToServer(selectedFile);
                 }
                 student.Status = true;
                 if (StudentExists(student.Sid))
                 {
-                    ModelState.AddModelError("", "Oh Ooh...! The Id you have entered is already exists in our records, Please try another one...");
+                    ModelState.AddModelError("", "Oh Ooh...! The Id you have entered already exists in our records, Please try another one...");
                     return View(student);
                 }
                 _context.Add(student);
@@ -99,49 +97,42 @@ namespace MVCCoreDBF.Controllers
         }
 
         // POST: Student/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Sid,Name,Class,Fees,Photo,Status")] Student student,IFormFile selectedFile)
+        public async Task<IActionResult> Edit(int id, [Bind("Sid,Name,Class,Fees,Photo,Status")] Student student, IFormFile selectedFile)
         {
             if (id != student.Sid)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid || ModelState.ErrorCount==1 && ModelState["selectedFile"].ValidationState== ModelValidationState.Invalid)
+            if (ModelState.IsValid || ModelState.ErrorCount == 1 && ModelState["selectedFile"].ValidationState == ModelValidationState.Invalid)
             {
                 if (selectedFile != null)
                 {
-                    student.Photo = await UploadToCloudinary(selectedFile);
+                    student.Photo = SaveFileToServer(selectedFile);
                 }
-                else if (TempData["Photo"] != null)
-                {
-                    student.Photo = TempData["Photo"].ToString();
-                }
-
                 else if (TempData["Photo"] != null)
                 {
                     student.Photo = TempData["Photo"].ToString();
                 }
                 try
-                    {
+                {
                     student.Status = true;
-                        _context.Update(student);
-                        await _context.SaveChangesAsync();
-                    }
-                    catch(DbUpdateConcurrencyException)
+                    _context.Update(student);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!StudentExists(student.Sid))
                     {
-                        if (!StudentExists(student.Sid))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        return NotFound();
                     }
+                    else
+                    {
+                        throw;
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(student);
@@ -174,7 +165,6 @@ namespace MVCCoreDBF.Controllers
             if (student != null)
             {
                 student.Status = false;
-               // _context.Students.Remove(student);
             }
 
             await _context.SaveChangesAsync();
@@ -185,40 +175,28 @@ namespace MVCCoreDBF.Controllers
         {
             return _context.Students.Any(e => e.Sid == id);
         }
-        public async Task<string> UploadToCloudinary(IFormFile file)
+
+        // Method to save file locally to the server
+        public string SaveFileToServer(IFormFile file)
         {
-            var cloudName = "dzdwthulr";
-            var apiKey = "932547346819814";
-            var apiSecret = "kDgJwwA7a1dPDpyBapA9PY0nbes";
+            if (file == null || file.Length == 0)
+                return null;
 
-            using var client = new HttpClient();
+            // Generate a unique file name to avoid name conflicts
+            var fileName = Path.GetFileNameWithoutExtension(file.FileName);
+            var extension = Path.GetExtension(file.FileName);
+            fileName = $"{Guid.NewGuid()}{extension}";  // Add a unique ID to the file name
 
-            var byteArray = Encoding.ASCII.GetBytes($"{apiKey}:{apiSecret}");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+            // Get the path where the file should be saved
+            var uploadPath = Path.Combine(_webHost.WebRootPath, "images", fileName);
 
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms);
-            var byteData = ms.ToArray();
-            var base64 = Convert.ToBase64String(byteData);
+            // Save the file to the server
+            using (var stream = new FileStream(uploadPath, FileMode.Create))
+            {
+                file.CopyTo(stream);
+            }
 
-            var content = new MultipartFormDataContent
-    {
-        { new StringContent(base64), "file" },
-        { new StringContent($"https://api.cloudinary.com/v1_1/{cloudName}/image/upload"), "upload_preset" }
-    };
-
-            var postUrl = $"https://api.cloudinary.com/v1_1/{cloudName}/image/upload";
-            var payload = new MultipartFormDataContent();
-            payload.Add(new ByteArrayContent(byteData), "file", file.FileName);
-            payload.Add(new StringContent("ml_default"), "upload_preset");
-
-            var response = await client.PostAsync(postUrl, payload);
-            var json = await response.Content.ReadAsStringAsync();
-
-            dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
-            return result.secure_url;
+            return $"images/{fileName}";  // Return the relative path
         }
-
-
     }
 }
