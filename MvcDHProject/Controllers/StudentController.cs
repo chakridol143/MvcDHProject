@@ -28,7 +28,7 @@ namespace MVCCoreDBF.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Students.ToListAsync());
+            return View(await _context.Students.OrderBy(s=>s.Sid).ToListAsync());
         }
 
         // GET: Student/Details/5
