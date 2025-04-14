@@ -270,7 +270,7 @@ namespace MvcDHProject.Controllers
         
         public IActionResult ExternalLogin(string provider,string returnUrl)
         {
-            var url = Url.Action("CallBack", "Account", new { ReturnUrl = returnUrl });
+            var url = Url.Action("CallBack", "Account", new { ReturnUrl = returnUrl }, Request.Scheme, Request.Host.ToString()); // Add Request.Scheme and Request.Host
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, url);
             return new ChallengeResult(provider, properties);
         }
