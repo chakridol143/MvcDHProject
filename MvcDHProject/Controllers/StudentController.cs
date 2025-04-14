@@ -61,19 +61,11 @@ namespace MVCCoreDBF.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Sid,Name,Class,Fees,Photo,Status")] Student student,IFormFile selectedFile)
         {
-            if (ModelState.IsValid || ModelState.ErrorCount == 1 && ModelState["selectedFile"].ValidationState == ModelValidationState.Invalid) { 
-                
-                if(selectedFile != null)
+            if (ModelState.IsValid || ModelState.ErrorCount == 1 && ModelState["selectedFile"].ValidationState == ModelValidationState.Invalid) {
+
+                if (selectedFile != null)
                 {
-                    string path = _webHost.WebRootPath + "\\images";
-                    if (!Directory.Exists(path))
-                    {
-                        Directory.CreateDirectory(path);
-                    }
-                    var filePath = path + "\\" + selectedFile.FileName;
-                    FileStream fs = new FileStream(filePath,FileMode.Create);
-                    selectedFile.CopyTo(fs);
-                    student.Photo = selectedFile.FileName;
+                    student.Photo = await UploadToImgBB(selectedFile);
                 }
                 student.Status = true;
                 if (StudentExists(student.Sid))
@@ -119,18 +111,15 @@ namespace MVCCoreDBF.Controllers
 
             if (ModelState.IsValid || ModelState.ErrorCount==1 && ModelState["selectedFile"].ValidationState== ModelValidationState.Invalid)
             {
-                if(selectedFile != null)
+                if (selectedFile != null)
                 {
-                    string path = _webHost.WebRootPath + "\\images";
-                    if (!Directory.Exists(path))
-                    {
-                        Directory.CreateDirectory(path);
-                    }
-                    string filePath =path+ "\\"+ selectedFile.FileName;
-                    FileStream fs = new FileStream(filePath,FileMode.Create);
-                    selectedFile.CopyTo(fs);
-                    student.Photo = selectedFile.FileName;
+                    student.Photo = await UploadToImgBB(selectedFile);
                 }
+                else if (TempData["Photo"] != null)
+                {
+                    student.Photo = TempData["Photo"].ToString();
+                }
+
                 else if (TempData["Photo"] != null)
                 {
                     student.Photo = TempData["Photo"].ToString();
@@ -195,5 +184,25 @@ namespace MVCCoreDBF.Controllers
         {
             return _context.Students.Any(e => e.Sid == id);
         }
+        public async Task<string> UploadToImgBB(IFormFile file)
+        {
+            using var client = new HttpClient();
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            var base64 = Convert.ToBase64String(ms.ToArray());
+
+            var content = new MultipartFormDataContent
+    {
+        { new StringContent("e1e71cb428283c64caf645cbe2543b38"), "key" },
+        { new StringContent(base64), "image" }
+    };
+
+            var response = await client.PostAsync("https://api.imgbb.com/1/upload", content);
+            var json = await response.Content.ReadAsStringAsync();
+
+            dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+            return result.data.url;
+        }
+
     }
 }
