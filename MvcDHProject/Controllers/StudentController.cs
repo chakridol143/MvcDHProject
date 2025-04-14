@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +66,7 @@ namespace MVCCoreDBF.Controllers
 
                 if (selectedFile != null)
                 {
-                    student.Photo = await UploadToImgBB(selectedFile);
+                    student.Photo = await UploadToCloudinary(selectedFile);
                 }
                 student.Status = true;
                 if (StudentExists(student.Sid))
@@ -113,7 +114,7 @@ namespace MVCCoreDBF.Controllers
             {
                 if (selectedFile != null)
                 {
-                    student.Photo = await UploadToImgBB(selectedFile);
+                    student.Photo = await UploadToCloudinary(selectedFile);
                 }
                 else if (TempData["Photo"] != null)
                 {
@@ -184,25 +185,40 @@ namespace MVCCoreDBF.Controllers
         {
             return _context.Students.Any(e => e.Sid == id);
         }
-        public async Task<string> UploadToImgBB(IFormFile file)
+        public async Task<string> UploadToCloudinary(IFormFile file)
         {
+            var cloudName = "dzdwthulr";
+            var apiKey = "932547346819814";
+            var apiSecret = "kDgJwwA7a1dPDpyBapA9PY0nbes";
+
             using var client = new HttpClient();
+
+            var byteArray = Encoding.ASCII.GetBytes($"{apiKey}:{apiSecret}");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
             using var ms = new MemoryStream();
             await file.CopyToAsync(ms);
-            var base64 = Convert.ToBase64String(ms.ToArray());
+            var byteData = ms.ToArray();
+            var base64 = Convert.ToBase64String(byteData);
 
             var content = new MultipartFormDataContent
     {
-        { new StringContent("e1e71cb428283c64caf645cbe2543b38"), "key" },
-        { new StringContent(base64), "image" }
+        { new StringContent(base64), "file" },
+        { new StringContent($"https://api.cloudinary.com/v1_1/{cloudName}/image/upload"), "upload_preset" }
     };
 
-            var response = await client.PostAsync("https://api.imgbb.com/1/upload", content);
+            var postUrl = $"https://api.cloudinary.com/v1_1/{cloudName}/image/upload";
+            var payload = new MultipartFormDataContent();
+            payload.Add(new ByteArrayContent(byteData), "file", file.FileName);
+            payload.Add(new StringContent("ml_default"), "upload_preset");
+
+            var response = await client.PostAsync(postUrl, payload);
             var json = await response.Content.ReadAsStringAsync();
 
             dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
-            return result.data.url;
+            return result.secure_url;
         }
+
 
     }
 }
