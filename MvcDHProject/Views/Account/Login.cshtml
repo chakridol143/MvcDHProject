@@ -5,44 +5,114 @@
     var returnUrl = Context.Request.Query["ReturnUrl"];
 }
 
-<h1>Login</h1>
+<div class="container vh-100 d-flex justify-content-center align-items-center">
+    <div class="row w-100 shadow rounded-4 overflow-hidden" style="max-width: 900px; background: #fff;">
 
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Login" asp-route-ReturnUrl="@returnUrl">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+        <!-- Left Side: Login Form -->
+        <div class="col-md-6 p-4 d-flex flex-column justify-content-center">
+            <h3 class="text-center mb-4">Login</h3>
+            <form asp-action="Login" asp-route-ReturnUrl="@returnUrl" method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="custom-input" placeholder="Enter your name" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Password" class="control-label"></label>
+                    <input asp-for="Password" type="password" class="custom-input" placeholder="Enter your password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-group form-check mb-4">
+                    <input class="form-check-input" asp-for="RememberMe" />
+                    <label class="form-check-label" asp-for="RememberMe"></label>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <input type="submit" value="Login" class="btn btn-primary w-100" />
+                    <input type="reset" value="Reset" class="btn btn-secondary w-100" />
+                </div>
+            </form>
+            <div style="margin:20px;">
+                New User? <a style="margin-bottom:5px;" asp-action="Register">Click</a> to register.<br />
+                Forgot password? <a asp-action="ForgotPassword">Click</a> to reset your password.
             </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="RememberMe" /> @Html.DisplayNameFor(model => model.RememberMe)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Login" class="btn btn-primary" />
-                <input type="reset" value="Reset" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-    <div class="col-md-6" align="center">
-        <form asp-action="ExternalLogin"  asp-route-returnUrl="@returnUrl">
-        <h4 style="font-size:xx-large">Other Login options</h4>
-        <input type="submit" name="Provider" value="Google" class="btn btn-outline-primary" />
-        <input type="submit" name="Provider" value="Facebook" class="btn btn-outline-primary" />
-        </form>
+        </div>
+
+        <!-- Right Side: Other Login Options -->
+        <div class="col-md-6 p-4 bg-light d-flex flex-column justify-content-center align-items-center">
+            <h4 class="mb-4" style="font-size: xx-large;">Other Login Options</h4>
+
+            <form asp-action="ExternalLogin" asp-route-returnUrl="@returnUrl" method="post" class="w-100 d-flex flex-column align-items-center">
+                <button type="submit" name="Provider" value="Google" class="btn btn-outline-danger w-75 mb-3">
+                    <i class="bi bi-google"></i> Login with Google
+                </button>
+
+                <button type="submit" name="Provider" value="Facebook" class="btn btn-outline-primary w-75">
+                    <i class="bi bi-facebook"></i> Login with Facebook
+                </button>
+            </form>
+        </div>
+
     </div>
 </div>
 
-<div>
-    New User? <a asp-action="Register">Click</a> to register.<br />
-    Forgot password? <a asp-action="ForgotPassword">Click</a> to reset your password.
-</div>
+<!-- Custom Styling -->
+<style>
+    .custom-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        outline: none;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        font-size: 16px;
+    }
+
+        .custom-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+        }
+
+    .google-btn {
+        background-color: #db4437;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 16px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+        .google-btn:hover {
+            background-color: #c23321;
+            color: #fff;
+            text-decoration: none;
+        }
+
+    .btn {
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    @@media (max-width: 768px) {
+        .row
+
+    {
+        flex-direction: column;
+    }
+
+    .col-md-6 {
+        width: 100%;
+    }
+
+    }
+</style>
+

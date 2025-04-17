@@ -4,50 +4,83 @@
     ViewData["Title"] = "Register";
 }
 
-<h1>Register</h1>
+<style>
+    .custom-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        outline: none;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        font-size: 16px;
+    }
 
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Register">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
+        .custom-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+        }
+
+    .custom-card {
+        width: 100%;
+        max-width: 450px;
+        padding: 20px 25px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        background: white;
+    }
+
+    .form-group, .mb-3, .mb-4 {
+        margin-bottom: 12px !important;
+    }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="custom-card">
+        <h2 class="text-center mb-4">Create Your Account</h2>
+
+        <form asp-action="Register" method="post">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="custom-input" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ConfirmPassword" class="control-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="custom-input" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Mobile" class="control-label"></label>
-                <input asp-for="Mobile" class="form-control" />
+
+            <div class="mb-3">
+                <label asp-for="Mobile" class="form-label"></label>
+                <input asp-for="Mobile" class="custom-input" />
                 <span asp-validation-for="Mobile" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Submit" class="btn btn-primary" />
-                <input type="reset" value="Reset" class="btn btn-warning" />
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="custom-input" type="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
+
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" class="custom-input" type="password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 rounded-pill">Register</button>
         </form>
+
+        <div class="text-center mt-3">
+            <small>Already have an account? <a href="/Account/Login">Login</a></small>
+        </div>
     </div>
 </div>
 
-<div>
-    If already registered? <a asp-action="Login">Login</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
